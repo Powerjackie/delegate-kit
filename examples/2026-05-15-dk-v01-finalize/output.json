@@ -1,0 +1,49 @@
+{
+  "_reconstruction_note": "Original worker JSON was not captured in chat transcript. Fields below are reconstructed from observed post-conditions (file diffs at the time of dispatch and the resulting dcb052c commit). Marked fields use null where the original value cannot be recovered.",
+  "task_id": "dk-v01-finalize-20260515",
+  "status": "done",
+  "summary": "Reconstructed from effects. Worker wrote 6 ADR entries (DEC-1 through DEC-6) into delegate-kit's .agent-memory/DECISIONS.md, prepended a 2026-05-15 stop-point to workspace HANDOVER.md preserving prior entries, replaced examples/README.md with the per-run convention spec, and made the initial commit dcb052c staging all top-level non-gitignored files. Main-agent verification (run after the worker reported) passed all 6 acceptance criteria.",
+  "changed_files": [
+    {
+      "path": "/Users/lawson/Workspace/repos/delegate-kit/.agent-memory/DECISIONS.md",
+      "lines_added": null,
+      "summary": "Six ADR entries DEC-1 to DEC-6 covering project name, license, scope, brief/output format, file ownership, soft-policy framing"
+    },
+    {
+      "path": "/Users/lawson/Workspace/.agent-memory/HANDOVER.md",
+      "lines_added": null,
+      "summary": "New 2026-05-15 stop-point entry, prior 2026-05-11 entry preserved"
+    },
+    {
+      "path": "/Users/lawson/Workspace/repos/delegate-kit/examples/README.md",
+      "lines_added": null,
+      "summary": "Replaced PPB default with per-run directory convention (brief.md / output.json / notes.md)"
+    }
+  ],
+  "git_state_post_run": {
+    "commit_sha": "dcb052c",
+    "commit_message_subject": "Initial commit: delegate-kit v0.1 scaffolding",
+    "files_committed": 11,
+    "lines_added": 1042,
+    "agent_memory_gitignored": true,
+    "committer_identity": "lawson <lawson@lawsondeMacBook-Air.local>",
+    "committer_identity_note": "Auto-configured by git from hostname. Replaced post-hoc with Powerjackie <Powerjackie@users.noreply.github.com> via git config --local before subsequent commits."
+  },
+  "validation_results": [
+    {"command": "git log -1 --oneline", "exit_code": 0, "result": "pass", "note": "showed dcb052c"},
+    {"command": "git status -s", "exit_code": 0, "result": "pass", "note": "clean working tree (modulo gitignored .agent-memory/)"},
+    {"command": "grep -c '^## 2026' DECISIONS.md", "exit_code": 0, "result": "pass", "note": "expected >=6, got 6"},
+    {"command": "grep -c 'DEC-' DECISIONS.md", "exit_code": 0, "result": "pass", "note": "expected >=6, got 6"},
+    {"command": "head -5 workspace HANDOVER.md", "exit_code": 0, "result": "pass-by-judgment", "note": "command itself was flawed (preamble masks target); worker passed by semantic check, not literal head -5 output. Documented as a v0.2 lesson."},
+    {"command": "test -s examples/README.md && grep -q 'YYYY-MM-DD' examples/README.md", "exit_code": 0, "result": "pass"}
+  ],
+  "risks": [
+    "head -5 validation command was brittle (passed by worker judgment, not literal output)",
+    "Commit message body asserts 'No real-run eval yet' but the commit IS the eval — same self-referential staleness as the HANDOVER text. Logged but not amended."
+  ],
+  "followups": [
+    "Capture this run's lessons in workspace SUBAGENT_PLAYBOOK and project CONTRIBUTING — completed in dk-v01-lessons (commits 9a9d9dc, 1cb6fa9)",
+    "Decide whether to retroactively archive this run as an example — completed in this archive directory"
+  ],
+  "blocked_on": ""
+}
