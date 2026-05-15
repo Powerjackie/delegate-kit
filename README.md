@@ -4,9 +4,10 @@
 > Claude Code and OpenCode. Classifier + Research / Executor / Reviewer
 > brief templates with structured JSON outputs.
 
-**Status:** v0.1 — scaffolding complete, no real-world eval runs yet. Use
-at your own discretion; expect rough edges. Feedback and example briefs
-welcome (see [`CONTRIBUTING.md`](CONTRIBUTING.md)).
+**Status:** v0.1 — scaffolding complete, two self-bootstrap evals run
+(see [`examples/`](examples/)); not yet validated against unrelated
+production workflows. Use at your own discretion; expect rough edges.
+Feedback and example briefs welcome (see [`CONTRIBUTING.md`](CONTRIBUTING.md)).
 
 ## Why this exists
 
@@ -67,6 +68,20 @@ install explicitly:
 ~/delegate-kit/install/opencode.sh
 ```
 
+### OpenAI Codex CLI
+
+Codex uses the same SKILL.md format as Claude Code. Install into
+`~/.codex/skills/`:
+
+```bash
+~/delegate-kit/install/codex.sh
+```
+
+Codex auto-discovery from `~/.codex/skills/` is unverified at v0.1 — if
+the skills do not load after install, the alternative is to register
+delegate-kit as a Codex plugin marketplace (`codex plugin marketplace`).
+Tracked as a v0.2 candidate.
+
 ### Dev mode (hacking on this repo)
 
 Use `--symlink` so edits to `skills/*/SKILL.md` go live without re-running
@@ -118,9 +133,10 @@ OpenCode `permission.task`, etc.).
 
 ## Limitations
 
-- v0.1 has not been validated against a real production delegation
-  workflow yet. Expect brief-template fields to shift after the first
-  few real runs.
+- v0.1 has only been validated against two self-bootstrap evals (the
+  kit was used to scaffold and document itself, see [`examples/`](examples/)).
+  Brief-template fields are likely to shift after the first delegation
+  on an unrelated production codebase.
 - Native Windows install requires WSL or manual copy.
 - No automated SKILL.md linter yet (planned for v0.2).
 
