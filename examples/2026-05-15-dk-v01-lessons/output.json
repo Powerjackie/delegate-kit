@@ -1,0 +1,19 @@
+{
+  "task_id": "dk-v01-lessons-20260515",
+  "status": "done",
+  "summary": "Appended §13 'Lessons from real-run evals' (with the 'Validation command authoring' sub-section) to SUBAGENT_PLAYBOOK.md after the existing §12, and inserted the 'Brief-authoring gotchas (from real runs)' section between '## Style' and '## Repo conventions' in delegate-kit's CONTRIBUTING.md. Both insertions used verbatim body text. No other sections, numbering, or files were touched; no git operations performed.",
+  "changed_files": [
+    {"path": "/Users/lawson/Workspace/.agent-memory/SUBAGENT_PLAYBOOK.md", "lines_added": 18, "summary": "Append §13 with validation-command-authoring lesson"},
+    {"path": "/Users/lawson/Workspace/repos/delegate-kit/CONTRIBUTING.md", "lines_added": 23, "summary": "Insert 'Brief-authoring gotchas' section between Style and Repo conventions"}
+  ],
+  "validation_results": [
+    {"command": "grep -c '^## 13\\.' /Users/lawson/Workspace/.agent-memory/SUBAGENT_PLAYBOOK.md", "exit_code": 0, "result": "pass"},
+    {"command": "grep -q 'Validation command authoring' /Users/lawson/Workspace/.agent-memory/SUBAGENT_PLAYBOOK.md", "exit_code": 0, "result": "pass"},
+    {"command": "grep -q 'Brief-authoring gotchas' /Users/lawson/Workspace/repos/delegate-kit/CONTRIBUTING.md", "exit_code": 0, "result": "pass"},
+    {"command": "grep -q \"Don't bake pre-completion state\" /Users/lawson/Workspace/repos/delegate-kit/CONTRIBUTING.md", "exit_code": 0, "result": "pass"},
+    {"command": "grep -c '^## [0-9]\\+\\.' /Users/lawson/Workspace/.agent-memory/SUBAGENT_PLAYBOOK.md", "exit_code": 0, "result": "pass"}
+  ],
+  "risks": [],
+  "followups": [],
+  "blocked_on": ""
+}
