@@ -55,6 +55,30 @@ Most valuable contributions, in order:
 - Skill descriptions: concrete trigger phrases first, abstract description
   second, reverse triggers last.
 
+## Brief-authoring gotchas (from real runs)
+
+These are lessons captured from actual delegation runs. Add to this
+section when a real eval surfaces a new gotcha.
+
+### Don't bake pre-completion state into completion artifacts
+
+A brief that produces a status artifact (HANDOVER update, commit message,
+CHANGELOG line, README badge, etc.) must not hard-code "pending" or
+"awaits eval" text into that artifact — because the artifact's existence
+is the proof that the task is complete.
+
+**Wrong.** A brief instructs the worker to write
+`"v0.1 awaits first real-run eval"` into HANDOVER, while the brief's own
+completion *is* the first eval. The text is obsolete the moment it lands.
+
+**Right.** Either (a) hard-code post-completion truth
+(`"v0.1 eval complete — see commit X"`), or (b) have the worker compute
+the status string from its own success path so it can write "done" only
+if it actually finished.
+
+(Origin: delegate-kit v0.1 bootstrap eval, 2026-05-15. See workspace
+SUBAGENT_PLAYBOOK §13 for the related validation-command lesson.)
+
 ## Repo conventions
 
 - `.agent-memory/` is gitignored. Don't commit local development memory.
