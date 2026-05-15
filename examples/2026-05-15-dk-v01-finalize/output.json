@@ -1,8 +1,8 @@
 {
-  "_reconstruction_note": "Original worker JSON was not captured in chat transcript. Fields below are reconstructed from observed post-conditions (file diffs at the time of dispatch and the resulting dcb052c commit). Marked fields use null where the original value cannot be recovered.",
+  "_reconstruction_note": "Original worker JSON was not captured in chat transcript. Fields below are reconstructed from observed post-conditions (file diffs at the time of dispatch and the resulting 62e6355 commit). Marked fields use null where the original value cannot be recovered.",
   "task_id": "dk-v01-finalize-20260515",
   "status": "done",
-  "summary": "Reconstructed from effects. Worker wrote 6 ADR entries (DEC-1 through DEC-6) into delegate-kit's .agent-memory/DECISIONS.md, prepended a 2026-05-15 stop-point to workspace HANDOVER.md preserving prior entries, replaced examples/README.md with the per-run convention spec, and made the initial commit dcb052c staging all top-level non-gitignored files. Main-agent verification (run after the worker reported) passed all 6 acceptance criteria.",
+  "summary": "Reconstructed from effects. Worker wrote 6 ADR entries (DEC-1 through DEC-6) into delegate-kit's .agent-memory/DECISIONS.md, prepended a 2026-05-15 stop-point to workspace HANDOVER.md preserving prior entries, replaced examples/README.md with the per-run convention spec, and made the initial commit 62e6355 staging all top-level non-gitignored files. Main-agent verification (run after the worker reported) passed all 6 acceptance criteria.",
   "changed_files": [
     {
       "path": "/Users/lawson/Workspace/repos/delegate-kit/.agent-memory/DECISIONS.md",
@@ -21,16 +21,17 @@
     }
   ],
   "git_state_post_run": {
-    "commit_sha": "dcb052c",
+    "commit_sha": "62e6355",
     "commit_message_subject": "Initial commit: delegate-kit v0.1 scaffolding",
     "files_committed": 11,
     "lines_added": 1042,
     "agent_memory_gitignored": true,
-    "committer_identity": "lawson <lawson@lawsondeMacBook-Air.local>",
-    "committer_identity_note": "Auto-configured by git from hostname. Replaced post-hoc with Powerjackie <Powerjackie@users.noreply.github.com> via git config --local before subsequent commits."
+    "committer_identity_at_dispatch_time": "lawson <lawson@lawsondeMacBook-Air.local>",
+    "committer_identity_current": "Powerjackie <Powerjackie@users.noreply.github.com>",
+    "committer_identity_note": "Auto-configured by git from hostname at dispatch time. Before first public push, git config --local was set to the noreply identity AND history was rewritten via git rebase --root --exec 'git commit --amend --reset-author --no-edit'. All four pre-existing commits were re-authored, changing every SHA. Safety tag pre-identity-rewrite-20260515 preserves the original chain."
   },
   "validation_results": [
-    {"command": "git log -1 --oneline", "exit_code": 0, "result": "pass", "note": "showed dcb052c"},
+    {"command": "git log -1 --oneline", "exit_code": 0, "result": "pass", "note": "showed 62e6355"},
     {"command": "git status -s", "exit_code": 0, "result": "pass", "note": "clean working tree (modulo gitignored .agent-memory/)"},
     {"command": "grep -c '^## 2026' DECISIONS.md", "exit_code": 0, "result": "pass", "note": "expected >=6, got 6"},
     {"command": "grep -c 'DEC-' DECISIONS.md", "exit_code": 0, "result": "pass", "note": "expected >=6, got 6"},
@@ -42,7 +43,7 @@
     "Commit message body asserts 'No real-run eval yet' but the commit IS the eval — same self-referential staleness as the HANDOVER text. Logged but not amended."
   ],
   "followups": [
-    "Capture this run's lessons in workspace SUBAGENT_PLAYBOOK and project CONTRIBUTING — completed in dk-v01-lessons (commits 9a9d9dc, 1cb6fa9)",
+    "Capture this run's lessons in workspace SUBAGENT_PLAYBOOK and project CONTRIBUTING — completed in dk-v01-lessons (commits c2de801, 4d4f886)",
     "Decide whether to retroactively archive this run as an example — completed in this archive directory"
   ],
   "blocked_on": ""

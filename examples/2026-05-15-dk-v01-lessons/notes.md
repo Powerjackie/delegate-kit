@@ -54,7 +54,7 @@ vs. plain prose elsewhere being instructions.
 ### 4. Pre-completion vs post-completion state — second sighting
 
 The first eval's `git_commit_spec` baked "No real-run eval yet" into the
-commit message body. That line is now permanently in `dcb052c`'s history,
+commit message body. That line is now permanently in `62e6355`'s history,
 ironic because the commit itself is part of the eval. Not amending (single
 commit, low harm), but worth noting as a real cost of the staleness
 anti-pattern just documented in CONTRIBUTING.md.

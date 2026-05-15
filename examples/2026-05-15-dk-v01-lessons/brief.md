@@ -10,7 +10,7 @@
 
 This is the **second** real-run eval of the delegate-kit skill suite. Its
 job was to capture two lessons surfaced by the first eval (the v0.1
-finalization run, commit `dcb052c`) into the two appropriate homes:
+finalization run, commit `62e6355`) into the two appropriate homes:
 
 - A workspace-level lesson (`SUBAGENT_PLAYBOOK.md` §13) about validation
   command authoring.

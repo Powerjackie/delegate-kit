@@ -2,7 +2,7 @@
 
 First real-run eval of the delegate-kit skill suite. Standard/Executor:
 finalize v0.1 scaffolding by writing three docs and making the initial
-git commit. Run produced commit `dcb052c`.
+git commit. Run produced commit `62e6355`.
 
 This archive was created retroactively (after the second eval,
 `dk-v01-lessons`, establish the per-run example layout). See `brief.md`
@@ -40,23 +40,35 @@ the workspace HANDOVER. The brief's own completion *was* the first eval,
 so this line was obsolete the moment it was written. The user manually
 corrected HANDOVER post-hoc.
 
-The same anti-pattern still lives in `dcb052c`'s commit message body:
+The same anti-pattern still lives in `62e6355`'s commit message body:
 `"No real-run eval yet; v0.2 follows first delegation."` Not amending —
 root commit, low marginal harm, useful as a permanent example of the
 anti-pattern in the project's own git history.
 
 **Captured as delegate-kit CONTRIBUTING.md "Brief-authoring gotchas".**
 
-### 3. Local-auto-config git identity
+### 3. Local-auto-config git identity (and the history rewrite)
 
-Commit `dcb052c` was made under `lawson <lawson@lawsondeMacBook-Air.local>`,
-git's auto-derived identity from system hostname. Hostname leak in OSS
-commit history is undesirable.
+The original v0.1 commit was made under
+`lawson <lawson@lawsondeMacBook-Air.local>` — git's auto-derived identity
+from system hostname. Hostname leak in OSS commit history is undesirable.
 
-**Remediation**: subsequent commits (9a9d9dc and onward) use
-`Powerjackie <Powerjackie@users.noreply.github.com>` via
-`git config --local`. Earlier commits remain under the old identity
-unless explicitly rebased + amended before remote push.
+**Remediation taken**: before the first public push, `git config --local`
+was set to `Powerjackie <Powerjackie@users.noreply.github.com>` and
+**history was rewritten** with `git rebase --root --exec
+'git commit --amend --reset-author --no-edit'`. All four pre-existing
+commits were re-authored; SHAs changed wholesale:
+
+| Original SHA (pre-rewrite) | Current SHA |
+|---|---|
+| `dcb052c` | `62e6355` |
+| `9a9d9dc` | `c2de801` |
+| `1cb6fa9` | `4d4f886` |
+| `528f6a8` | `e13db45` |
+
+The safety tag `pre-identity-rewrite-20260515` preserves the original
+chain for forensic comparison. Stale SHA references in archived examples
+were updated mechanically.
 
 ## What this run did NOT test
 

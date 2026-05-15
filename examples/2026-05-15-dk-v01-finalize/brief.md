@@ -4,7 +4,7 @@
 - **Dispatched:** 2026-05-15
 - **Dispatcher:** main Claude Code session (this repo's author)
 - **Subagent type:** worker (dispatched outside main session — see Reconstruction notes)
-- **Outcome:** done — see `output.json` and the resulting `dcb052c` commit
+- **Outcome:** done — see `output.json` and the resulting `62e6355` commit
 
 ## Reconstruction notes
 
@@ -20,7 +20,7 @@ observed effects:
 - `output.json` was not captured in chat transcript at the time. It is
   reconstructed from observable post-conditions (six ADRs in DECISIONS.md,
   examples/README.md replacement, workspace HANDOVER edits, and the
-  `dcb052c` commit).
+  `62e6355` commit).
 - `notes.md` is original to this archive entry, written after the second
   eval (`dk-v01-lessons`) had completed.
 
@@ -160,7 +160,7 @@ Two flaws in the brief authoring became apparent during or after the run:
    instructed the worker to write "v0.1 awaits first real-run eval"
    into HANDOVER, while the brief's own completion *was* that eval. The
    line was obsolete the moment it landed. (The user later corrected
-   HANDOVER directly; the same anti-pattern still lives in `dcb052c`'s
+   HANDOVER directly; the same anti-pattern still lives in `62e6355`'s
    commit message body.)
 
 Both lessons were captured in the second eval (`dk-v01-lessons`) and
