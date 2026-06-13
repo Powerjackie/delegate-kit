@@ -9,6 +9,12 @@
 production workflows. Use at your own discretion; expect rough edges.
 Feedback and example briefs welcome (see [`CONTRIBUTING.md`](CONTRIBUTING.md)).
 
+**Runtime (Claude Code):** [delegate-flow](https://github.com/Powerjackie/delegate-flow)
+runs these same briefs and schemas on the Workflow engine — file-ownership
+disjointness becomes a hard gate, output shape is enforced at the tool layer, and
+research findings are adversarially verified. delegate-kit defines *what to say to a
+subagent*; delegate-flow defines *how to run a fleet of them, deterministically*.
+
 ## Why this exists
 
 When you delegate a task to a subagent, three things go wrong by default:
