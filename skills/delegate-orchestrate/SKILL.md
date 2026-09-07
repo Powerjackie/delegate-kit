@@ -1,117 +1,77 @@
 ---
 name: delegate-orchestrate
-description: Decide whether and how to delegate a task to subagents. Use when the user asks to delegate, parallelize, spawn agents/subagents, run audits, compare candidate approaches, do codebase exploration that would pollute main context, hand off implementation work, or split work across Research/Executor/Reviewer roles. Also triggers on Chinese phrases like "派 subagent", "并行", "调研", "候选方案对比", "codebase 探索", "审查". Classifies task complexity, picks role, writes self-contained briefs with explicit file ownership, enforces structured JSON output for mergeable returns. Do not use for one-line fixes faster inline, tasks requiring continuous back-and-forth, or scope still fluid with frequent requirement changes.
-allowed-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
-  - Agent
+description: Plan delegation when the user asks to delegate, parallelize, spawn subagents, or split independent work (派 subagent, 并行派工). Selects a minimal brief, checks dependencies and isolation, and verifies evidence. Do not load for ordinary implementation, research, or review unless delegation is requested or has a clear benefit.
 ---
 
-## 0) Entrypoint (MAIN agent quick guide)
+# Delegate with the smallest useful contract
 
-You are the MAIN agent. When a non-trivial task arrives:
+Use the host's native agent tools. This skill supplies coordination guidance,
+not a scheduler, permission system, or substitute for the user's instructions.
 
-1. Decide delegate vs keep inline (§1, §2).
-2. If delegate: decide serial vs parallel (§3) and pick role (§4).
-3. Choose the smallest sufficient model per subagent (§4).
-4. Write a brief per subagent using the role-specific skill (`delegate-research`,
-   `delegate-execute`, `delegate-review`), spawn subagents, and merge structured
-   JSON outputs into a single final answer.
+## Decide whether delegation helps
 
-Cross-platform gotchas to enforce in every brief:
+Keep work inline when dispatch, context transfer, and integration cost exceed
+the benefit. File count alone is not a trigger. Delegate independent work,
+noisy exploration, or an independent check when it improves the outcome.
+Do not spawn an agent just to follow this skill.
 
-- Do NOT assume `cd` persists across subagent commands; use repo-relative or
-  absolute paths in every command.
-- Prefer cross-platform commands; avoid `sed -i`, `xargs`, `osascript`, and
-  PowerShell-only one-liners when the skill must run on macOS/Linux/Windows.
-- Keep briefs self-contained: no "as discussed", "use the previous plan", or
-  any reference to parent-chat context.
+Before dispatch, inspect available tools: context inheritance, isolation,
+permissions, communication, resume/cancel support, and model selection.
+Do not assume a tool named Agent exists or invent unsupported parameters.
+If delegation is unavailable, continue inline within authorization and report
+that limitation. Never claim a delegation occurred when it did not.
 
----
+## Default brief
 
-## 1) Delegate triggers (when to say YES)
+For a bounded task, these four fields are enough; reuse a native tool's
+equivalent fields rather than duplicate them:
 
-Delegate when ANY of:
-
-- High cognitive load: multi-file/multi-component work or non-linear deps.
-- ≥2 branches with minimal coupling (parallelizable).
-- You mainly need execution artifacts (diffs/logs/tests) rather than narrative.
-- You want to isolate long exploration from main context.
-- The result has a fixed return interface (return a schema, not a story).
-
-## 2) Non-delegate triggers (when to say NO)
-
-Do NOT delegate when ANY of:
-
-- Single-file/tiny-scope task; faster inline.
-- Outcome depends on continuous conversation context that delegation dilutes.
-- Requirements likely to change mid-flight; subagent will return outdated work.
-- Merge/review cost likely > execution benefit.
-- Only 1–3 tool actions are needed; spawn overhead dominates.
-
----
-
-## 3) Serial vs parallel
-
-- **Parallel only if** exclusive_write sets are disjoint (see role skills' `file_ownership` block).
-- **Parallel only if** you can state dependencies in one sentence and they're minimal.
-- If you cannot clearly express the dependency quickly, assume there IS one → serial.
-- Cap parallel fan-out at **2–4** for personal-dev scenarios; beyond that, main-agent merge cost exceeds gain.
-
----
-
-## 4) Roles & model tiers
-
-Pick one role per subagent. Each role has its own brief skill — read it before
-drafting the brief.
-
-| Role | Use for | Skill | Default tier |
-|---|---|---|---|
-| **research** | Read-only exploration, evidence gathering, audits | `delegate-research` | Small |
-| **executor** | Bounded-scope implementation + tests | `delegate-execute` | Balanced |
-| **reviewer** | Validate against acceptance criteria, audit diffs | `delegate-review` | Balanced |
-
-Model rule: step up one tier ONLY when the specific subagent's task requires
-ambiguity resolution or synthesis. Default is the smallest sufficient tier.
-
-Tier mapping (Claude Code today):
-
-- **Small**: Haiku — research, grep-style scans, log summarization
-- **Balanced**: Sonnet — implementation, review, most worker tasks
-- **Premium**: Opus — only for cross-cutting architecture or final merge of conflicting outputs
-
----
-
-## 5) Universal output schema (every role complies)
-
-Every subagent MUST return exactly one fenced JSON block. Role-specific
-skills may add fields, but these are required everywhere:
-
-```json
-{
-  "task_id": "<short-id>",
-  "status": "<one of: done | blocked | partially_done>",
-  "summary": "<one-paragraph plain-text summary>",
-  "risks": [],
-  "followups": [],
-  "blocked_on": "<populated only when status=blocked, else empty string>"
-}
+```text
+goal: [question to answer or outcome to deliver]
+context: [repo/worktree, read-first files, relevant decisions or evidence]
+boundaries: [allowed changes and side effects; exclusions]
+done_when: [observable acceptance and required verification]
 ```
 
-The main agent should read JSON first and only consult the subagent's prose
-when JSON is ambiguous or insufficient.
+Include missing context, not a transcript dump. Check what the worker inherits;
+explicitly state the goal and boundaries even when history is inherited.
+Read only the relevant role guide when it adds value:
+`../delegate-research/SKILL.md`, `../delegate-execute/SKILL.md`, or
+`../delegate-review/SKILL.md`. Roles describe this assignment, not permanent
+model identities. Routine investigation may be part of implementation.
 
----
+Load `references/strict-contract.md` only for shared contracts, external side
+effects, costly recovery, complex dependencies, or machine-consumed results.
+Do not silently change a schema expected by an existing consumer.
 
-## 6) Reminder — MAIN agent responsibilities (always)
+## Coordinate execution
 
-The main agent always:
+- In a shared checkout, assign non-overlapping write ownership. Also check
+  shared interfaces, generated files, git index, databases, ports and services.
+  Different files do not imply independent behavior.
+- In separate worktrees, overlapping paths are possible. Name an integration
+  owner and a merge/test order before dispatch. Worktrees do not isolate
+  external services or make semantic conflicts disappear.
+- Serialize dependent work until its prerequisite contract is settled. For
+  uncertainty, delegate discovery first and update the plan from evidence.
+- Choose concurrency from independent work, host limits, budget and ability
+  to integrate results. There is no universal numeric fan-out limit.
+- Choose a supported model for reasoning difficulty, error cost and budget.
+  Simple inventory and architectural research need different capabilities.
+  Respect user selection; leave host defaults when selection is unavailable.
+- Use native progress messages and resume where supported. On a scope change,
+  revise affected assignments and cancel obsolete work. Resolve permission
+  or scope expansions through the parent within the user's authorization.
 
-- Locks task definition and acceptance criteria up front.
-- Chooses decomposition, tool permissions, and role assignments.
-- Writes briefs that are self-contained (no hidden assumptions).
-- Reads structured JSON before prose when merging.
-- Runs final sanity checks (compile/test/grep) before reporting to user.
-- Updates HANDOVER memory if the workflow changed durable project state.
+## Return and verify
+
+Default return: completion status, result, evidence, and unresolved limits.
+Concise prose is fine. Use structured output only when a consumer needs it;
+prefer a host-enforced schema, otherwise validate JSON before consuming it.
+A fenced block alone is not schema enforcement.
+
+The parent checks acceptance against artifacts, diffs and meaningful tests.
+After parallel implementation, verify the integrated state, not just individual
+reports. Do not repeat expensive checks without a reason. Distinguish task
+completion, protocol adherence and measured benefit; none proves the others.
+Update project continuity when durable state changes, within declared scope.

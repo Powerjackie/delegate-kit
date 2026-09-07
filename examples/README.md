@@ -14,7 +14,7 @@ Use one directory per real run:
 ```text
 examples/YYYY-MM-DD-<task-slug>/
   brief.md
-  output.json
+  output.md             # or output.json for a machine contract
   notes.md
 ```
 
@@ -23,7 +23,13 @@ examples/YYYY-MM-DD-<task-slug>/
 After a real delegation run:
 
 1. Copy the brief sent to the subagent into `brief.md` and sanitize any secrets.
-2. Save the subagent's full JSON output as `output.json`.
+2. Save the subagent's actual full output as `output.md`, or `output.json`
+   when a JSON contract was used. Do not convert prose into fabricated JSON.
 3. Write `notes.md` covering which role skill triggered, whether the description matched on the first try, which fields you wished existed, and which fields felt vestigial.
+
+The existing v0.1 examples are historical self-bootstrap runs, not evidence
+that v0.2 improves performance. Preserve their original artifacts. Record
+task success, protocol adherence and comparative benefit separately; see
+[the evaluation plan](../docs/evaluation.md).
 
 PRs welcome.

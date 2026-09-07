@@ -29,8 +29,9 @@ Most valuable contributions, in order:
 ## Before opening a change
 
 1. Read `README.md` and at least one of the existing `skills/*/SKILL.md`.
-2. Run the install script in `--symlink` mode and load the skill into
-   Claude Code or OpenCode to verify the description triggers as expected:
+2. Check installation in a temporary project directory, then load the skill
+   in a fresh host session to test triggering when that host is available.
+   Installation alone is not a triggering test. For local development:
 
    ```bash
    ./install/claude-code.sh --symlink
@@ -48,10 +49,12 @@ Most valuable contributions, in order:
 
 ## Style
 
-- Brief templates: Markdown, snake_case field names, square-bracket
-  placeholders.
-- Output schemas: fenced JSON with placeholder strings like
-  `"<one of: done | blocked | partially_done>"` for enum-typed fields.
+- Brief templates: four fields by default (goal, context, boundaries,
+  done_when). Add coordination detail only when the assignment needs it.
+- Outputs: concise evidence reports by default. Machine consumers specify
+  an exact schema and validate it; a fenced JSON block does not enforce one.
+- Keep existing runtime contracts explicit. See the extended contract's
+  v0.1 compatibility section before changing machine-consumed fields.
 - Skill descriptions: concrete trigger phrases first, abstract description
   second, reverse triggers last.
 
@@ -80,6 +83,14 @@ if it actually finished.
 SUBAGENT_PLAYBOOK §13 for the related validation-command lesson.)
 
 ## Repo conventions
+
+- Review the scenarios in `docs/evaluation.md` when changing behavior. Record
+  static checks separately from live task acceptance, protocol adherence and
+  paired comparisons. Never infer all three from a successful commit.
+- Preserve historical examples verbatim except necessary secret redaction.
+  Add corrections in notes rather than rewriting old outputs to pass a schema.
+- Validate reference paths and copy/symlink installation, including nested
+  reference files. Report unavailable host tests explicitly.
 
 - `.agent-memory/` is gitignored. Don't commit local development memory.
 - Project follows the workspace four-piece memory convention internally

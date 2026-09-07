@@ -1,110 +1,35 @@
 ---
 name: delegate-review
-description: Write a brief for a Reviewer subagent — validate an existing artifact against a rubric (PR diff review, pre-merge audit, design-doc critique, security scan of a specific module, scorecard for candidate approaches). Use after delegate-orchestrate has classified the task as Reviewer role, or when the user asks to "review", "audit", "score", "validate", "审查", or "评审" with no implementation expected. The subagent reads artifacts and rubric, returns a scorecard + conflicts + merge recommendation as structured JSON. Do not use for exploration (use delegate-research) or to fix issues found (dispatch a separate delegate-execute brief).
-allowed-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
+description: Prepare an independent review assignment for a subagent after delegation has been chosen, or when the user explicitly requests a delegated artifact review. Defines the artifact, acceptance criteria, and evidence needed for findings. Do not load for ordinary inline review or implementation of fixes.
 ---
 
-## 0) When to use this skill
+# Delegate an independent check
 
-Read this skill when drafting a brief for a Reviewer subagent — a subagent
-that **never edits**; it consumes artifacts (diff, file, PR, design doc,
-multiple subagents' outputs) and returns a structured judgment.
+Name the artifact and the decision the review supports. Do not initiate
+delegation solely because this skill loaded.
 
-## 1) Reviewer brief template
-
-```
-task_id: <slug-YYYYMMDD-N>
-parent_task: <one-sentence goal stated in MAIN agent's terms>
-subagent_role: reviewer
-
-objective: |
-  <what specifically to review and what decision the main agent needs, 1-3 lines>
-
-artifacts:
-  - kind: <one of: diff | file | pr | merge-candidates | design-doc>
-    ref: <path, commit SHA, PR URL, or list of task_ids>
-  # multiple artifacts allowed; reviewer compares them when kind=merge-candidates
-
-rubric:
-  - dimension: correctness
-    weight: <0..1>
-    check: <how to assess>
-  - dimension: completeness
-    weight: <0..1>
-    check: <...>
-  - dimension: safety
-    weight: <0..1>
-    check: <e.g., secrets, injection, destructive ops>
-  - dimension: <add project-specific dimension, e.g., performance, style>
-    weight: <0..1>
-    check: <...>
-
-acceptance_criteria:
-  - [ ] Each artifact scored on every rubric dimension.
-  - [ ] Every "fail" or "concern" cites specific path / line / hunk.
-  - [ ] Output includes one of: approve | request_changes | block, with reason.
-  - [ ] If artifacts conflict, list conflicts with a recommended resolution.
-
-scope:
-  you_may_not:
-    - edit any file
-    - run destructive commands
-    - re-spawn subagents to "verify" findings
-  you_must:
-    - cite a path:line for every "fail" or "concern"
-    - score conservatively when evidence is missing (don't pad scores)
-
-stop_conditions:
-  - all rubric dimensions scored on every artifact
-  - or required artifacts are unreadable (then status=blocked)
+```text
+goal: [what judgment is needed]
+context: [artifact path or revision, base revision, acceptance and constraints]
+boundaries: [read-only scope and whether side-effecting validation is allowed]
+done_when: [concrete findings with evidence, or no findings plus coverage limits]
 ```
 
-## 2) Required output schema (Reviewer)
+Review against acceptance and actual behavior. Prioritize correctness,
+regressions and missing validation. Explain a finding's trigger, impact and
+supporting file:line or reproducible evidence. Distinguish confirmed defects
+from questions and hypotheses. Do not manufacture findings to fill a rubric.
 
-Reviewer subagent MUST return exactly this JSON shape:
+Default final report: completion status; findings ordered by severity;
+checks performed and coverage limits; recommendation if requested. A clean
+review means no issues found within that coverage, not proof of correctness.
+Summarizing enough context to explain a finding is part of review.
 
-```json
-{
-  "task_id": "<short-id>",
-  "status": "<one of: done | blocked | partially_done>",
-  "summary": "<one paragraph in plain prose>",
-  "recommendation": "<one of: approve | request_changes | block>",
-  "recommendation_reason": "<one or two sentences>",
-  "scorecard": [
-    {
-      "artifact": "<ref from brief>",
-      "dimension": "<from rubric>",
-      "score": "<one of: pass | concern | fail>",
-      "evidence": "<path:line or hunk reference>",
-      "note": "<short explanation>"
-    }
-  ],
-  "conflicts": [
-    {
-      "field_or_decision": "<what conflicts between artifacts>",
-      "options": ["<artifact-A says>", "<artifact-B says>"],
-      "recommendation": "<which option, and why>"
-    }
-  ],
-  "risks": [],
-  "followups": [
-    "<fix to dispatch separately, with suggested role>"
-  ],
-  "blocked_on": ""
-}
-```
+Use a scorecard only when comparing candidates or when the caller requests
+one. Define dimensions and checks first; introduce numeric weights only when
+an actual aggregation rule and decision threshold need them.
 
-## 3) Anti-patterns to reject in your own brief
-
-- Rubric dimensions with no `check` → reviewer will fabricate criteria.
-- All rubric weights = 1.0 → no signal in aggregation.
-- Asking Reviewer to "fix what you find" → scope drift; the contract is
-  judgment, not implementation.
-- Missing `artifacts.ref` (just kind, no concrete path/SHA/URL) → reviewer
-  has nothing to read.
-- Combining "review the PR AND summarize what it does" → these are
-  different tasks; the second is Research role.
+Keep implementation separate from an independent review assignment. Return
+actionable findings to the parent, which can authorize fixes and determine
+whether another verification pass is needed. Follow an explicit machine
+schema when a consumer requires it; otherwise concise prose is sufficient.

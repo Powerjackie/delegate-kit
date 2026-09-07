@@ -1,117 +1,43 @@
 ---
 name: delegate-execute
-description: Write a brief for an Executor subagent — bounded-scope implementation with explicit write permissions (bug fix in a defined directory, add a test, refactor inside a module, generate config from a template). Use after delegate-orchestrate has classified the task as Executor role, or when the user asks to "implement", "fix", "refactor in <module>", "write tests for", "add" with explicit scope. The subagent edits within declared file_ownership and returns changed_files + test results as structured JSON. Do not use for exploration (use delegate-research), validation of existing artifacts (use delegate-review), or open-scope refactors without bounded ownership.
-allowed-tools:
-  - Read
-  - Grep
-  - Glob
-  - Edit
-  - Write
-  - Bash
+description: Prepare a bounded implementation assignment for an Executor subagent after delegation has been chosen, or when the user explicitly requests an implementation handoff. Defines authorized changes and acceptance evidence. Do not load for ordinary inline coding, open-ended planning, or a read-only review.
 ---
 
-## 0) When to use this skill
+# Delegate implementation
 
-Read this skill when drafting a brief for an Executor subagent — i.e., a
-subagent allowed to **write to specific files only**, with a clear acceptance
-test it must pass before reporting completion.
+Use the host's native worker mechanism. Do not initiate delegation solely
+because this skill loaded. Default to a short brief:
 
-## 1) Executor brief template
-
-```
-task_id: <slug-YYYYMMDD-N>
-parent_task: <one-sentence goal stated in MAIN agent's terms>
-subagent_role: executor
-
-objective: |
-  <what specific change to make, in 1-3 lines>
-
-problem_statement: |
-  <the bug or gap, with concrete repro or symptom>
-
-acceptance_criteria:
-  - [ ] <criterion 1 — must be testable>
-  - [ ] <criterion 2>
-  - [ ] All listed validation commands pass.
-
-file_ownership:
-  exclusive_write:
-    - <path-or-glob>      # files you may edit
-  read_only_allowed:
-    - <path-or-glob>      # files you may read but not edit
-  forbidden:
-    - <path-or-category>  # everything else: tests of unrelated modules,
-                          # public schema/contract files, VERSION, RELEASES.md,
-                          # migrations, .env, secrets/**, etc.
-
-scope:
-  you_may_not:
-    - modify public API names, exported types, or schemas
-    - introduce new dependencies
-    - reformat unrelated code
-    - bump versions, tag, push, merge
-  you_must:
-    - keep diff minimal
-    - preserve existing behavior except where acceptance_criteria require change
-    - update or add tests for new behavior
-    - never delete tests to make work pass
-
-validation_commands:
-  - <repo-relative command, e.g., `pytest tests/<module> -q`>
-  - <e.g., `npm test -- <scope>`>
-  - <e.g., `ruff check src/<module>`>
-
-escalation_rules:
-  - If you must edit a `forbidden` path, stop and report — do not edit.
-  - If validation fails twice with no progress, stop and report — do not
-    expand scope.
-  - If you discover a related bug outside `exclusive_write`, list it in
-    `followups`; do not fix it inline.
+```text
+goal: [specific behavior to change, with symptom or reproduction]
+context: [checkout, read-first files and relevant existing patterns]
+boundaries: [owned files/module, exclusions and authorized side effects]
+done_when: [observable behavior and risk-appropriate validation]
 ```
 
-## 2) Required output schema (Executor)
+Choose a coherent module boundary; do not enumerate every file before enough
+investigation has occurred. Reading and diagnosis within scope are part of
+implementation. Avoid unrelated refactors and preserve other people's edits.
+Tests, documentation and memory updates must be included in ownership if the
+task requires them. Do not silently broaden scope to finish housekeeping.
 
-Executor subagent MUST return exactly this JSON shape:
+For concurrent writers or shared contracts, read
+`../delegate-orchestrate/references/strict-contract.md`. Identify checkout
+isolation and shared resources as well as files. Only an assigned integration
+owner should commit combined work in a shared checkout, when authorized.
 
-```json
-{
-  "task_id": "<short-id>",
-  "status": "<one of: done | blocked | partially_done>",
-  "summary": "<one paragraph in plain prose>",
-  "changed_files": [
-    {"path": "<path>", "change": "<one-line description of what changed>"}
-  ],
-  "tests_run": [
-    {
-      "command": "<exact command>",
-      "result": "<one of: pass | fail | not_run>",
-      "log_excerpt": "<last ~10 lines if fail, empty if pass>"
-    }
-  ],
-  "acceptance_check": [
-    {
-      "criterion": "<verbatim from brief>",
-      "met": "<one of: yes | no | partial>",
-      "evidence": "<file:line or test name>"
-    }
-  ],
-  "risks": [
-    "<known issue you did not address, with reason>"
-  ],
-  "followups": [
-    "<related fix the main agent might want to dispatch separately>"
-  ],
-  "blocked_on": ""
-}
-```
+The worker should:
 
-## 3) Anti-patterns to reject in your own brief
+- Read before editing and use existing project patterns.
+- Make the smallest coherent change that satisfies acceptance.
+- Validate behavior proportionately to risk. Report tests not run and why;
+  do not add ceremonial tests for prose or remove tests to conceal failure.
+- Investigate failures while a plausible next step remains within scope.
+  Escalate when authority, dependencies or missing information block progress.
+- Report adjacent issues without silently taking ownership of them.
 
-- `file_ownership.exclusive_write` left as a single broad glob like `src/**`
-  → too permissive; narrow to the actual module.
-- No `validation_commands` → "done" becomes unverifiable.
-- Acceptance criterion written as "fix the bug" without a test → not testable.
-- Asking Executor to "also document this in README" → scope drift; either
-  add README to `exclusive_write` explicitly, or dispatch a follow-up.
-- Omitting `escalation_rules` → subagent will silently expand scope on
-  the first roadblock.
+Default final report: done / partially_done / blocked; changes; verification
+evidence; remaining limitations. Include paths, exact test commands and
+outcomes where useful. Completion is a claim the parent must verify against
+the resulting artifacts. If the caller specifies a machine schema, follow
+that exact contract instead of this prose format.

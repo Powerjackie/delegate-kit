@@ -1,151 +1,112 @@
 # delegate-kit
 
-> A cross-platform skill suite for delegating work to subagents in
-> Claude Code and OpenCode. Classifier + Research / Executor / Reviewer
-> brief templates with structured JSON outputs.
+A lightweight delegation guide for coding agents. Start with four fields:
+goal, context, boundaries, and completion evidence. Use the host's native
+agent tools; expand the contract only when the task needs it.
 
-**Status:** v0.1 — scaffolding complete, two self-bootstrap evals run
-(see [`examples/`](examples/)); not yet validated against unrelated
-production workflows. Use at your own discretion; expect rough edges.
-Feedback and example briefs welcome (see [`CONTRIBUTING.md`](CONTRIBUTING.md)).
+**Status: v0.2 protocol revision.** Static consistency and installation checks
+do not prove better task performance. The two archived v0.1 self-bootstrap
+runs demonstrate artifact delivery, not full protocol adherence or a measured
+advantage over native delegation. See [the evaluation plan](docs/evaluation.md).
 
-**Runtime (Claude Code):** [delegate-flow](https://github.com/Powerjackie/delegate-flow)
-runs these same briefs and schemas on the Workflow engine — file-ownership
-disjointness becomes a hard gate, output shape is enforced at the tool layer, and
-research findings are adversarially verified. delegate-kit defines *what to say to a
-subagent*; delegate-flow defines *how to run a fleet of them, deterministically*.
+## Quick start
 
-## Why this exists
+Ask your agent to delegate a bounded task. A typical brief is:
 
-When you delegate a task to a subagent, three things go wrong by default:
+```text
+goal: Identify why expired sessions sometimes remain authenticated.
+context: Read the auth module, its tests, and the project handover.
+boundaries: Read-only investigation; no source, cache, or service changes.
+done_when: Return the failing path with evidence, or explain the missing evidence.
+```
 
-1. **The subagent has no parent-chat context** — phrases like "as discussed
-   above" silently fail.
-2. **There's no enforced output shape** — the main agent has to re-read
-   long transcripts to merge results.
-3. **There's no agreed file-ownership contract** — parallel subagents
-   conflict on shared files.
+The parent chooses whether delegation helps, supplies the relevant context,
+and checks the result. A short evidence-backed report is the default.
+Loading a skill alone is not a reason to spawn another agent.
 
-`delegate-kit` is a four-skill suite that gives a personal-development
-agent loop (Claude Code, OpenCode, similar tools) a small, explicit
-**delegation protocol** to address all three.
+## Skills
 
-## What's inside
+| Skill | Assignment |
+|---|---|
+| `delegate-orchestrate` | Decide whether delegation helps and coordinate dependencies, isolation and integration |
+| `delegate-research` | Investigate a bounded question with evidence and uncertainty |
+| `delegate-execute` | Implement within an authorized boundary and verify the result |
+| `delegate-review` | Independently check a concrete artifact and report actionable findings |
 
-| Skill | Triggers on | Use it to write a brief for… |
-|---|---|---|
-| `delegate-orchestrate` | "delegate", "parallelize", "spawn agents", "audit", "派 subagent", "并行", "调研" | The main agent's classifier — decides whether to delegate, picks role, picks model tier, points at the role-specific skill |
-| `delegate-research` | "investigate", "explore", "audit", "trace", "调研" | A **read-only** subagent that returns findings + evidence as JSON |
-| `delegate-execute` | "implement", "fix in <module>", "refactor", "add tests for" | An **Executor** subagent with explicit `file_ownership` and validation commands |
-| `delegate-review` | "review", "audit", "score", "validate", "审查", "评审" | A **Reviewer** subagent that scores artifacts against a rubric and gives a merge recommendation |
+Descriptions target delegation requests rather than every mention of research,
+implementation or review. The four names remain stable. The role guides are
+optional detail; ordinary assignments do not need a multi-stage ceremony.
 
-Each role skill ships a brief template and a required output JSON schema.
-Brief templates are Markdown (human-writable, copy-pasteable); outputs are
-fenced JSON (machine-mergeable by the main agent).
+## When to expand the brief
+
+For shared interfaces, concurrent writers, external side effects, costly
+recovery or machine-consumed results, load the
+[extended contract](skills/delegate-orchestrate/references/strict-contract.md).
+It covers file ownership, dependencies, shared resources, integration and
+recovery. Only fill relevant sections.
+
+File ownership helps coordinate a shared checkout. Different files can still
+depend on the same interface or service. Separate worktrees can accommodate
+overlapping edits but still need integration and tests. Neither arrangement
+automatically isolates databases, ports or external state.
+
+Model choice follows reasoning difficulty, risk and budget, not role names.
+Concurrency follows independent work and host limits, not a fixed fan-out.
+Check available tools and inherited context before dispatch; use native
+communication and resume support where available.
 
 ## Install
 
-### Claude Code (user-level, default)
+Clone the repository, then choose your host:
 
 ```bash
-git clone https://github.com/<your-fork>/delegate-kit ~/delegate-kit
-~/delegate-kit/install/claude-code.sh
+git clone https://github.com/Powerjackie/delegate-kit.git
+cd delegate-kit
+./install/claude-code.sh
+# Or:
+./install/opencode.sh
+# Or:
+./install/codex.sh
 ```
 
-Copies the four skills into `~/.claude/skills/`. Reload Claude Code
-to pick them up.
+Scripts default to copying the complete skill directories, including reference
+files. Add `--symlink` for development. Add `--project /absolute/project/path`
+for project-local installation. Inspect a script's `--help` for its target.
+Existing matching destination directories are replaced by these installers.
 
-### Claude Code (project-level)
+The existing Claude Code and Codex installers target `~/.claude/skills/` and
+`~/.codex/skills/` respectively. Host discovery can vary by version and setup;
+verify the four skills appear in your host after reloading. Installation checks
+alone do not test natural-language triggering. OpenCode users should choose
+its explicit installer when compatibility discovery is unavailable.
 
-```bash
-~/delegate-kit/install/claude-code.sh --project /path/to/your/project
-```
+Installers require Bash (macOS, Linux, WSL or Git Bash). Native Windows users
+can manually copy all four skill directories into their host's skill location.
+Cross-host execution and Windows behavior remain incompletely tested.
 
-Installs into `<project>/.claude/skills/` — useful when the skills should
-travel with a repo.
+## Migrating from v0.1
 
-### OpenCode
+- Briefs default to four fields. Detailed ownership remains available on demand.
+- Reports default to prose with evidence. JSON is opt-in when a consumer needs it.
+- Fixed model tiers, concurrency limits and two-failure cutoffs are removed.
+- Skill frontmatter no longer lists platform-specific tool names. Configure
+  actual permissions on the worker through the host; these skills are soft policy.
 
-OpenCode reads `~/.claude/skills/` by default, so the Claude Code install
-usually covers it. If you've set `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1`,
-install explicitly:
+**Machine consumers must keep their existing contract until migrated.** The
+v0.2 optional envelope is not compatible with v0.1 role schemas. Pin to
+`b989426` or supply the consumer's exact brief and return schema explicitly.
 
-```bash
-~/delegate-kit/install/opencode.sh
-```
+[delegate-flow](https://github.com/Powerjackie/delegate-flow) is a separate
+runtime project. Its v0.2 compatibility has not been verified in this change;
+do not feed it default v0.2 prose reports as if they were v0.1 JSON.
 
-### OpenAI Codex CLI
+## Validation and contributions
 
-Codex uses the same SKILL.md format as Claude Code. Install into
-`~/.codex/skills/`:
-
-```bash
-~/delegate-kit/install/codex.sh
-```
-
-Codex auto-discovery from `~/.codex/skills/` is unverified at v0.1 — if
-the skills do not load after install, the alternative is to register
-delegate-kit as a Codex plugin marketplace (`codex plugin marketplace`).
-Tracked as a v0.2 candidate.
-
-### Dev mode (hacking on this repo)
-
-Use `--symlink` so edits to `skills/*/SKILL.md` go live without re-running
-the installer:
-
-```bash
-~/delegate-kit/install/claude-code.sh --symlink
-```
-
-### Windows
-
-The install scripts are Bash. On native Windows, use WSL / Git Bash, or
-manually copy `skills/delegate-*/SKILL.md` into
-`%USERPROFILE%\.claude\skills\`. A PowerShell installer is tracked for v0.2.
-
-## How it triggers
-
-When you ask the main agent to do something delegation-shaped — e.g.,
-*"audit how token refresh works across these modules"* or *"并行检查这三个
-分支的认证逻辑"* — Claude reads the matching skill's description and loads
-its body. The skill then guides the main agent through:
-
-1. **Classify** (orchestrate): delegate or not? Which role?
-2. **Write brief** (role-specific skill): copy template, fill `task_id`,
-   `parent_task`, `file_ownership`, `acceptance_criteria`, etc.
-3. **Spawn subagent** via the agent platform's Agent / Task tool with the
-   appropriate tool permissions.
-4. **Merge** by parsing the subagent's required JSON output.
-
-Skills are **soft policy** — they guide the agent's behavior when matched,
-but they are not hard sandboxes. Real permission boundaries live in the
-platform's tool / permission settings (Claude Code `allowed-tools`,
-OpenCode `permission.task`, etc.).
-
-## Design choices
-
-- **Markdown briefs, JSON outputs.** Asymmetry is deliberate: humans
-  write briefs (Markdown reads well), machines merge outputs (JSON parses
-  cleanly).
-- **File ownership is the parallel-safety primitive.** Two subagents may
-  run in parallel iff their `exclusive_write` sets are disjoint. No
-  separate "parallel constraint" bookkeeping.
-- **Three roles, not ten.** Research / Executor / Reviewer cover most
-  delegation needs. Add more only after observing repeat patterns.
-- **Cross-platform from the start, lightly tested.** Skill bodies avoid
-  OS-specific commands and require subagents to use repo-relative paths.
-  Honest status: developed on macOS, designed portable, Linux/Windows
-  untested. PRs documenting platform gotchas welcome.
-
-## Limitations
-
-- v0.1 has only been validated against two self-bootstrap evals (the
-  kit was used to scaffold and document itself, see [`examples/`](examples/)).
-  Brief-template fields are likely to shift after the first delegation
-  on an unrelated production codebase.
-- Native Windows install requires WSL or manual copy.
-- No automated SKILL.md linter yet (planned for v0.2).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for checks and
+[docs/evaluation.md](docs/evaluation.md) for paired native-vs-skill evaluation.
+Historical examples remain in [examples/](examples/). Improvements should be
+supported by task outcomes, not longer prompts or more completed forms.
 
 ## License
 
-Apache License 2.0 — see [`LICENSE`](LICENSE).
+Apache License 2.0. See [LICENSE](LICENSE).
